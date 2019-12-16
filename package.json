@@ -1,0 +1,14 @@
+{
+  "name": "advent-of-code-2019",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "kephin",
+  "license": "MIT",
+  "dependencies": {
+    "ava": "^2.4.0"
+  },
+  "scripts": {
+    "test": "ava",
+    "test:watch": "ava --watch"
+  }
+}
