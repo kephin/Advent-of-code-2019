@@ -8,16 +8,16 @@ const wirePath_2 = [
  ]
 
 const getAllBreakingPoints = wirePath => {
-  const point = { x: 0, y: 0 }
-  const points = [{ x: 0, y: 0 }]
+  const point = { x: 0, y: 0, distance: 0 }
+  const points = [{ x: 0, y: 0, distance: 0 }]
 
   for (const path of wirePath) {
     const direction = path[0]
     const length = parseInt(path.substring(1), 10)
-    if (direction === 'U')      point.y += length
-    else if (direction === 'R') point.x += length
-    else if (direction === 'D') point.y -= length
-    else if (direction === 'L') point.x -= length
+    if (direction === 'U')      { point.y += length; point.distance += length }
+    else if (direction === 'R') { point.x += length; point.distance += length }
+    else if (direction === 'D') { point.y -= length; point.distance += length }
+    else if (direction === 'L') { point.x -= length; point.distance += length }
     points.push({ ...point })
   }
   return points
@@ -47,18 +47,40 @@ const getIntersectionsDistance = (list_1, list_2) => {
         &&
         ((point_1_in_list_1.x - point_1_in_list_2.x) * (point_2_in_list_1.x - point_2_in_list_2.x) < 0)
       ) {
-        if (point_1_in_list_1.x === point_2_in_list_1.x) intersections.push(Math.abs(point_1_in_list_1.x) + Math.abs(point_1_in_list_2.y))
-        else intersections.push(Math.abs(point_1_in_list_2.x) + Math.abs(point_1_in_list_1.y))
+        if (point_1_in_list_1.x === point_2_in_list_1.x) {
+          intersections.push({
+            manhattanDistance: Math.abs(point_1_in_list_1.x) + Math.abs(point_1_in_list_2.y),
+            accumulatedDistance: point_1_in_list_1.distance + Math.abs(point_1_in_list_1.y - point_1_in_list_2.y) +
+              point_1_in_list_2.distance + Math.abs(point_1_in_list_2.x - point_1_in_list_1.x)
+          })
+        }
+        else {
+          intersections.push({
+            manhattanDistance: Math.abs(point_1_in_list_2.x) + Math.abs(point_1_in_list_1.y),
+            accumulatedDistance: point_1_in_list_1.distance + Math.abs(point_1_in_list_1.x - point_1_in_list_2.x) +
+              point_1_in_list_2.distance + Math.abs(point_1_in_list_2.y - point_1_in_list_1.y)
+          })
+        }
       }
     }
   }
   return intersections
 }
 
+const breakingPoints_1 = getAllBreakingPoints(wirePath_1)
+const breakingPoints_2 = getAllBreakingPoints(wirePath_2)
+const intersectionsDistance = getIntersectionsDistance(breakingPoints_1, breakingPoints_2)
+
 test('day3-1', t => {
-  const breakingPoints_1 = getAllBreakingPoints(wirePath_1)
-  const breakingPoints_2 = getAllBreakingPoints(wirePath_2)
-  const intersectionsDistance = getIntersectionsDistance(breakingPoints_1, breakingPoints_2)
-  const closestDistance = intersectionsDistance.sort((a, b) => a - b).shift()
+  const closestDistance = intersectionsDistance
+    .map(intersection => intersection.manhattanDistance)
+    .sort((a, b) => a - b).shift()
   t.is(closestDistance, 303)
+})
+
+test('day3-2', t => {
+  const closestDistance = intersectionsDistance
+    .map(intersection => intersection.accumulatedDistance)
+    .sort((a, b) => a - b).shift()
+  t.is(closestDistance, 11222)
 })
